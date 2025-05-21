@@ -1,0 +1,59 @@
+{% extends 'publications/base.html' %}
+{% load user_tags %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <img src="{{ user_object.avatar | media_path }}" alt="User Image" class="img-fluid">
+            </div>
+            <div class="col-md-6 mx-auto">
+                <h2 class="display-4">{{ user_object.email }}</h2>
+                <p class="lead">
+                    {% if user_object.first_name %}
+                        {{ user_object.first_name }}
+                    {% else %}
+                        Нет информации
+                    {% endif %}
+                </p>
+                <p class="lead">
+                    {% if user_object.last_name %}
+                        {{ user_object.last_name }}
+                    {% else %}
+                        Нет информации
+                    {% endif %}
+                </p>
+                <p class="lead">
+                    {% if user_object.phone_number %}
+                        {{ user_object.phone_number }}
+                    {% else %}
+                        Нет информации
+                    {% endif %}
+                </p>
+                <p class="lead">
+                    {% if user_object.country %}
+                        {{ user_object.country }}
+                    {% else %}
+                        Нет информации
+                    {% endif %}
+                </p>
+                <p class="lead">{{ user_object.is_active }}</p>
+                <p class="lead">{{ user_object.is_staff }}</p>
+                <p class="lead">{{ user_object.date_joined }}</p>
+                <div class="mt-2">
+                    {% if user.is_superuser or perms.users.can_block_user %}
+                        {% if user_object.is_active %}
+                            <a href="{% url 'users:user_update' user_object.pk %}" class="btn btn-danger btn-lg btn-block">
+                                Заблокировать
+                            </a>
+                        {% else %}
+                            <a href="{% url 'users:user_update' user_object.pk %}" class="btn btn-success btn-lg btn-block">
+                                Активировать
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

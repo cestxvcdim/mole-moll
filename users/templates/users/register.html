@@ -1,0 +1,17 @@
+{% extends 'publications/base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="post" enctype="multipart/form-data" class="mb-4">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-lg btn-block btn-success">
+                    Зарегистрироваться
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
