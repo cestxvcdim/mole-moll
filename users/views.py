@@ -1,5 +1,3 @@
-import stripe
-
 from decimal import Decimal
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
