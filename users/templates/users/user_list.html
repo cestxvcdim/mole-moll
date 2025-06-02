@@ -1,24 +1,87 @@
 {% extends 'publications/base.html' %}
+{% load user_tags %}
 
 {% block content %}
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for usr in object_list %}
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <div class="row justify-content-center">
-                            <h4 class="my-0 font-weight-normal">{{ usr.email }}</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row justify-content-center">
-                            <a href="{% url 'users:user_detail' usr.pk %}" class="btn btn-lg btn-block btn-outline-primary">
-                                Подробнее
-                            </a>
-                        </div>
-                    </div>
+    <div class="container mt-4">
+        {% if page_obj.object_list %}
+            {% for user_ in page_obj.object_list %}
+                <div class="d-flex align-items-center mb-3">
+                    <a href="{% url 'users:user-detail' user_.pk %}"
+                       class="d-flex align-items-center text-decoration-none text-dark">
+                        {% if user_.avatar %}
+                            <img src="{{ user_.avatar|media_path }}" alt="Avatar" class="rounded-circle"
+                                 style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-circle text-muted" style="font-size: 100px;"></i>
+                        {% endif %}
+                        <span class="ms-3 h5 mb-0">{{ user_.first_name }} {{ user_.last_name }}</span>
+                    </a>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="row justify-content-center">
+                <div class="col-md-6 d-flex align-items-center justify-content-center mb-4">
+                    <p>По вашему запросу ничего не найдено</p>
                 </div>
             </div>
-        {% endfor %}
+        {% endif %}
+
+        {% if page_obj.has_other_pages %}
+            <div class="row justify-content-center">
+                <div class="col-md-6 d-flex align-items-center justify-content-center mb-4">
+                    <nav aria-label="Пагинация">
+                        <ul class="pagination">
+                            {# Ссылка "«" на предыдущую страницу #}
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link btn btn-secondary btn-lg mx-1"
+                                       href="?q={{ query }}&amp;page={{ page_obj.previous_page_number }}"
+                                       aria-label="Previous">&laquo;
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                <span class="page-link btn btn-secondary btn-lg mx-1"
+                                      aria-hidden="true">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {# Пронумерованные страницы #}
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link btn btn-primary btn-lg mx-1">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link btn btn-secondary btn-lg mx-1"
+                                           href="?q={{ query }}&amp;page={{ num }}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {# Ссылка "»" на следующую страницу #}
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a
+                                            class="page-link btn btn-secondary btn-lg mx-1"
+                                            href="?q={{ query }}&amp;page={{ page_obj.next_page_number }}"
+                                            aria-label="Next"
+                                    >&raquo;</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                <span class="page-link btn btn-secondary btn-lg mx-1"
+                                      aria-hidden="true">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

@@ -3,57 +3,130 @@
 
 {% block content %}
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-6 mx-auto">
-                <img src="{{ user_object.avatar | media_path }}" alt="User Image" class="img-fluid">
-            </div>
-            <div class="col-md-6 mx-auto">
-                <h2 class="display-4">{{ user_object.email }}</h2>
-                <p class="lead">
-                    {% if user_object.first_name %}
-                        {{ user_object.first_name }}
-                    {% else %}
-                        Нет информации
-                    {% endif %}
-                </p>
-                <p class="lead">
-                    {% if user_object.last_name %}
-                        {{ user_object.last_name }}
-                    {% else %}
-                        Нет информации
-                    {% endif %}
-                </p>
-                <p class="lead">
-                    {% if user_object.phone_number %}
-                        {{ user_object.phone_number }}
-                    {% else %}
-                        Нет информации
-                    {% endif %}
-                </p>
-                <p class="lead">
-                    {% if user_object.country %}
-                        {{ user_object.country }}
-                    {% else %}
-                        Нет информации
-                    {% endif %}
-                </p>
-                <p class="lead">{{ user_object.is_active }}</p>
-                <p class="lead">{{ user_object.is_staff }}</p>
-                <p class="lead">{{ user_object.date_joined }}</p>
-                <div class="mt-2">
-                    {% if user.is_superuser or perms.users.can_block_user %}
-                        {% if user_object.is_active %}
-                            <a href="{% url 'users:user_update' user_object.pk %}" class="btn btn-danger btn-lg btn-block">
-                                Заблокировать
-                            </a>
+        <div class="row justify-content-center">
+            <div class="col-md-4 text-center">
+                {% if user_object.avatar %}
+                    <img src="{{ user_object.avatar|media_path }}" alt="User Image" class="rounded-circle img-fluid mb-3"
+                        style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                    <i class="bi bi-person-circle text-muted mb-3" style="font-size: 150px;"></i>
+                {% endif %}
+
+                <h2 class="h3">{{ user_object.first_name }} {{ user_object.last_name }}</h2>
+
+                {% if user.is_superuser or user == user_object %}
+                    <p class="mb-1">Номер телефона: {{ user_object.phone_number }}</p>
+                    <p class="mb-1">
+                        Email:
+                        {% if user_object.email %}
+                            {{ user_object.email }}
                         {% else %}
-                            <a href="{% url 'users:user_update' user_object.pk %}" class="btn btn-success btn-lg btn-block">
-                                Активировать
-                            </a>
+                            Нет информации
                         {% endif %}
+                    </p>
+                    <p class="mb-1">
+                        Страна:
+                        {% if user_object.country %}
+                            {{ user_object.country }}
+                        {% else %}
+                            Нет информации
+                        {% endif %}
+                    </p>
+                    <p class="mb-3">Дата создания аккаунта: {{ user_object.date_joined|date:"d.m.Y H:i" }}</p>
+                    <a href="{% url 'users:user-update' user_object.pk %}" class="btn btn-warning btn-lg">
+                        Редактировать профиль
+                    </a>
+                {% endif %}
+
+                {% if user != user_object %}
+                    {% if not is_subscribed_on_author %}
+                        <a href="{% url 'users:buy-subscription' user_object.pk %}"
+                           class="btn btn-primary mt-3">
+                            Купить подписку
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:user-detail' user_object.pk %}"
+                            class="btn btn-primary mt-3">
+                            Подписка оформлена
+                        </a>
                     {% endif %}
-                </div>
+                {% endif %}
             </div>
         </div>
+    </div>
+
+    <hr>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6 d-flex align-items-center justify-content-center mb-4">
+                <h3>Публикации пользователя</h3>
+            </div>
+        </div>
+        {% if user_publications %}
+            {% for pub in user_publications %}
+                <div class="row justify-content-center mb-4">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="card h-100 shadow-sm">
+                            {% if pub.image %}
+                                <img src="{{ pub.image|media_path }}" class="card-img-top" alt="Изображение публикации"
+                                     style="height: 400px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center"
+                                     style="height: 400px;">
+                                    <span class="text-muted">Нет изображения</span>
+                                </div>
+                            {% endif %}
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title mb-2 text-truncate">{{ pub.title }}</h5>
+                                <p class="card-text mb-1 text-muted">Автор: {{ pub.author }}</p>
+                                <p class="card-text mb-3">{{ pub.body|truncatechars:100 }}</p>
+
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <form method="post"
+                                                  action="{% url 'publications:toggle-publication-like' pub.pk %}">
+                                                {% csrf_token %}
+                                                {% if user.is_authenticated and user in pub.likes.all %}
+                                                    <button type="submit"
+                                                            class="btn btn-link p-0 me-1"
+                                                            style="color: #e3070e; font-size: 1.75rem;">
+                                                        <i class="bi bi-heart-fill"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="submit"
+                                                            class="btn btn-link p-0 me-1 text-muted"
+                                                            style="font-size: 1.75rem;">
+                                                        <i class="bi bi-heart"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </form>
+                                            <small class="text-muted">{{ pub.likes_count }}</small>
+                                        </div>
+
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-chat-dots me-2 fs-3"></i>
+                                            <small class="text-muted">{{ pub.commentaries.count }}</small>
+                                        </div>
+
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-eye me-2 fs-3"></i>
+                                            <small class="text-muted">{{ pub.views_count }}</small>
+                                        </div>
+
+                                    </div>
+                                    <a href="{% url 'publications:publication-detail' pub.pk %}"
+                                       class="btn btn-primary w-100">Подробнее</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">У пользователя нет публикаций.</p>
+        {% endif %}
     </div>
 {% endblock %}

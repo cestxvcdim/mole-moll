@@ -1,0 +1,142 @@
+{% extends 'publications/base.html' %}
+{% load publication_tags %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+
+        {% if page_obj.object_list %}
+            {% for pub in page_obj.object_list %}
+                <div class="row justify-content-center mb-4">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="card h-100 shadow-sm">
+                            {% if pub.image %}
+                                <img src="{{ pub.image|media_path }}" class="card-img-top" alt="Изображение публикации"
+                                    style="height: 400px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center"
+                                    style="height: 400px;">
+                                    <span class="text-muted">Нет изображения</span>
+                                </div>
+                            {% endif %}
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title mb-2 text-truncate">{{ pub.title }}</h5>
+                                <p class="card-text mb-1 text-muted">Автор: {{ pub.author }}</p>
+                                <p class="card-text mb-3">{{ pub.body|truncatechars:100 }}</p>
+
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <form method="post"
+                                                  action="{% url 'publications:toggle-publication-like' pub.pk %}">
+                                                {% csrf_token %}
+                                                {% if user.is_authenticated and user in pub.likes.all %}
+                                                    <button type="submit"
+                                                            class="btn btn-link p-0 me-1"
+                                                            style="color: #e3070e; font-size: 1.75rem;">
+                                                        <i class="bi bi-heart-fill"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="submit"
+                                                            class="btn btn-link p-0 me-1 text-muted"
+                                                            style="font-size: 1.75rem;">
+                                                        <i class="bi bi-heart"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </form>
+                                            <small class="text-muted">{{ pub.likes_count }}</small>
+                                        </div>
+
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-chat-dots me-2 fs-3"></i>
+                                            <small class="text-muted">{{ pub.commentaries.count }}</small>
+                                        </div>
+
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-eye me-2 fs-3"></i>
+                                            <small class="text-muted">{{ pub.views_count }}</small>
+                                        </div>
+
+                                    </div>
+                                    <a href="{% url 'publications:publication-detail' pub.pk %}"
+                                        class="btn btn-primary w-100">Подробнее</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="row justify-content-center">
+                <div class="col-md-6 d-flex align-items-center justify-content-center mb-4">
+                    <p>По вашему запросу ничего не найдено</p>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if page_obj.has_other_pages %}
+            <div class="row justify-content-center">
+                <div class="col-md-6 d-flex align-items-center justify-content-center mb-4">
+                    <nav aria-label="Пагинация">
+                        <ul class="pagination">
+                            {# Ссылка "«" на предыдущую страницу #}
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link btn btn-secondary btn-lg mx-1"
+                                       href="?q={{ query }}&amp;page={{ page_obj.previous_page_number }}"
+                                       aria-label="Previous">&laquo;
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link btn btn-secondary btn-lg mx-1"
+                                          aria-hidden="true">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {# Пронумерованные страницы #}
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link btn btn-primary btn-lg mx-1">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link btn btn-secondary btn-lg mx-1"
+                                           href="?q={{ query }}&amp;page={{ num }}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {# Ссылка "»" на следующую страницу #}
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a
+                                            class="page-link btn btn-secondary btn-lg mx-1"
+                                            href="?q={{ query }}&amp;page={{ page_obj.next_page_number }}"
+                                            aria-label="Next"
+                                    >&raquo;</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link btn btn-secondary btn-lg mx-1"
+                                          aria-hidden="true">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="row justify-content-center">
+            <div class="col-md-6 d-flex align-items-center justify-content-center mb-4">
+                <p>Войдите в профиль, чтобы воспользоваться функционалом.</p>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

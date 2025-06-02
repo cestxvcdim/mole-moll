@@ -1,19 +1,29 @@
 from django import forms
+from publications.models import Publication, Commentary
 
-class StyleFormMixin:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            if isinstance(field, forms.BooleanField):
-                field.widget.attrs.update({'class': 'form-check_input'})
-            elif isinstance(field, forms.DateTimeField):
-                field.widget = forms.DateTimeInput(
-                    attrs={
-                        'type': 'datetime-local',
-                        'class': 'form-control'
-                    },
-                    format='%Y-%m-%d %H:%M:%S'
-                )
-                field.input_formats = ['%Y-%m-%d %H:%M:%S']
-            else:
-                field.widget.attrs.update({'class': 'form-control'})
+
+class PublicationForm(forms.ModelForm):
+    class Meta:
+        model = Publication
+        fields = ('title', 'body', 'image', 'is_free')
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'is_free': forms.CheckboxInput(),
+        }
+
+
+class CommentaryForm(forms.ModelForm):
+    class Meta:
+        model = Commentary
+        fields = ('body',)
+        widgets = {
+            'body': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Ваш комментарий...'
+            }),
+        }
+        labels = {
+            'body': 'Комментарий',
+        }

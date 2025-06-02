@@ -1,0 +1,165 @@
+{% extends 'publications/base.html' %}
+{% load publication_tags %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6 text-center">
+                {% if object.image %}
+                    <img src="{{ object.image|media_path }}"
+                         alt="Pub Image"
+                         class="img-fluid rounded"
+                         style="max-height: 400px; width: auto;">
+                {% else %}
+                    <div class="bg-light text-center py-5 rounded">
+                        <span class="text-muted">Нет изображения</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <h2 class="display-4 text-center">{{ object.title }}</h2>
+                <hr>
+                <p class="lead">{{ object.body }}</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <span class="d-flex align-items-center">
+                            <form method="post"
+                                  action="{% url 'publications:toggle-publication-like' object.pk %}">
+                                {% csrf_token %}
+                                {% if user.is_authenticated and user in object.likes.all %}
+                                    <button type="submit"
+                                            class="btn btn-link p-0 me-1"
+                                            style="color: #e3070e; font-size: 1.75rem;">
+                                        <i class="bi bi-heart-fill"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="submit"
+                                            class="btn btn-link p-0 me-1 text-muted"
+                                            style="font-size: 1.75rem;">
+                                        <i class="bi bi-heart"></i>
+                                    </button>
+                                {% endif %}
+                            </form>
+                            <span class="text-muted me-3">{{ object.likes_count }}</span>
+                        </span>
+
+                        <span class="me-4 d-flex align-items-center">
+                            <i class="bi bi-eye me-1 fs-3"></i>
+                            {{ object.views_count }}
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <a href="{% url 'users:user-detail' object.author.pk %}" class="d-flex align-items-center text-decoration-none text-muted">
+                            {% if object.author.avatar %}
+                                <img src="{{ object.author.avatar|media_path }}" alt="Avatar" class="rounded-circle me-2"
+                                    style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                                <i class="bi bi-person-circle fs-2 me-2"></i>
+                            {% endif %}
+                            <span>{{ object.author.first_name }} {{ object.author.last_name }}</span>
+                        </a>
+                        <span class="ms-4 text-muted">Опубликовано: {{ object.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8 d-flex flex-wrap">
+                {% if user == object.author or user.is_superuser %}
+                    <a href="{% url 'publications:publication-update' object.pk %}"
+                       class="btn btn-warning btn-lg me-3 mb-3">
+                        Отредактировать
+                    </a>
+                    <a href="{% url 'publications:publication-delete' object.pk %}"
+                       class="btn btn-danger btn-lg me-3 mb-3">
+                        Удалить
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <h4 class="mb-3">Комментарии</h4>
+
+                {% if object.commentaries.all %}
+                    {% for comment in object.commentaries.all %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>{{ comment.author }}</strong>
+                                    <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                <p class="mb-2">{{ comment.body }}</p>
+
+                                {% if user == comment.author or user.is_superuser %}
+                                    <div class="d-flex">
+                                        <a href="{% url 'publications:edit-commentary' comment.pk %}"
+                                           class="btn btn-sm btn-outline-primary me-2">
+                                            Редактировать
+                                        </a>
+                                        <a href="{% url 'publications:delete-commentary' comment.pk %}"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Удалить
+                                        </a>
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-flex align-items-center">
+                                    <form method="post"
+                                          action="{% url 'publications:toggle-comment-like' comment.pk %}">
+                                        {% csrf_token %}
+                                        {% if user.is_authenticated and user in comment.likes.all %}
+                                            <button type="submit"
+                                                    class="btn btn-link p-0 me-1"
+                                                    style="color: #0d6efd;">
+                                                <i class="bi bi-hand-thumbs-up-fill"></i>
+                                            </button>
+                                        {% else %}
+                                            <button type="submit"
+                                                    class="btn btn-link p-0 me-1 text-muted">
+                                                <i class="bi bi-hand-thumbs-up"></i>
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                    <span class="text-muted">
+                                        {{ comment.likes_count }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Пока нет комментариев.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row justify-content-center mb-5" id="comment-form">
+            <div class="col-md-8">
+                <h5>Добавить комментарий</h5>
+                <form method="post" action="{% url 'publications:add-commentary' object.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                    <textarea name="body"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Ваш комментарий..."
+                              required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

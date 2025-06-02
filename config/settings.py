@@ -42,11 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'rest_framework',
-    'django_filters',
-    'drf_yasg',
-    'corsheaders',
-
     'publications',
     'users',
 ]
@@ -59,14 +54,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
-]
-
-CORS_ALLOW_ALL_ORIGINS = False
-
-CORS_ALLOWED_ORIGINS = [
-    "https://docs.stripe.com",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -89,9 +76,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -156,8 +140,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'users.User'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/publications/'
+LOGOUT_REDIRECT_URL = '/publications/'
 LOGIN_URL = '/users/login'
 LOGOUT_URL = '/users/logout'
 
@@ -178,6 +162,8 @@ CSU_PHONE_NUMBER = os.getenv('CSU_PHONE_NUMBER')
 CSU_PASSWORD = os.getenv('CSU_PASSWORD')
 CSU_FIRST_NAME = os.getenv('CSU_FIRST_NAME')
 CSU_LAST_NAME = os.getenv('CSU_LAST_NAME')
+
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
 
 CACHE_ENABLED = True
 
