@@ -7,13 +7,14 @@ from users.models import User
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        user = User.objects.create(
-            phone_number=CSU_PHONE_NUMBER,
-            first_name=CSU_FIRST_NAME,
-            last_name=CSU_LAST_NAME,
-            is_staff=True,
-            is_superuser=True,
-        )
+        if not User.objects.filter(phone_number=CSU_PHONE_NUMBER).exists():
+            user = User.objects.create(
+                phone_number=CSU_PHONE_NUMBER,
+                first_name=CSU_FIRST_NAME,
+                last_name=CSU_LAST_NAME,
+                is_staff=True,
+                is_superuser=True,
+            )
 
-        user.set_password(CSU_PASSWORD)
-        user.save()
+            user.set_password(CSU_PASSWORD)
+            user.save()
