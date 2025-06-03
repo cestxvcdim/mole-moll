@@ -22,7 +22,7 @@
             <div class="col-md-8">
                 <h2 class="display-4 text-center">{{ object.title }}</h2>
                 <hr>
-                <p class="lead">{{ object.body }}</p>
+                <p class="lead">{{ object.body|linebreaks }}</p>
             </div>
         </div>
 
@@ -65,7 +65,7 @@
                             {% else %}
                                 <i class="bi bi-person-circle fs-2 me-2"></i>
                             {% endif %}
-                            <span>{{ object.author.first_name }} {{ object.author.last_name }}</span>
+                            <span>{{ object.author }}</span>
                         </a>
                         <span class="ms-4 text-muted">Опубликовано: {{ object.created_at|date:"d.m.Y H:i" }}</span>
                     </div>
@@ -97,23 +97,22 @@
                         <div class="card mb-3">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <strong>{{ comment.author }}</strong>
-                                    <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
-                                </div>
-                                <p class="mb-2">{{ comment.body }}</p>
-
-                                {% if user == comment.author or user.is_superuser %}
-                                    <div class="d-flex">
-                                        <a href="{% url 'publications:edit-commentary' comment.pk %}"
-                                           class="btn btn-sm btn-outline-primary me-2">
-                                            Редактировать
-                                        </a>
-                                        <a href="{% url 'publications:delete-commentary' comment.pk %}"
-                                           class="btn btn-sm btn-outline-danger">
-                                            Удалить
+                                    <div class="d-flex align-items-center">
+                                        <a href="{% url 'users:user-detail' comment.author.pk %}"
+                                           class="d-flex align-items-center text-decoration-none text-dark">
+                                            {% if comment.author.avatar %}
+                                                <img src="{{ comment.author.avatar|media_path }}" alt="Avatar"
+                                                    class="rounded-circle me-2"
+                                                    style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <i class="bi bi-person-circle fs-2 me-2"></i>
+                                            {% endif %}
+                                            <strong>{{ comment.author }}</strong>
                                         </a>
                                     </div>
-                                {% endif %}
+                                    <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                <p class="mb-2">{{ comment.body|linebreaks }}</p>
 
                                 <div class="d-flex align-items-center">
                                     <form method="post"
@@ -136,6 +135,19 @@
                                         {{ comment.likes_count }}
                                     </span>
                                 </div>
+
+                                {% if user == comment.author or user.is_superuser %}
+                                    <div class="d-flex">
+                                        <a href="{% url 'publications:edit-commentary' comment.pk %}"
+                                           class="btn btn-sm btn-outline-primary me-2">
+                                            Редактировать
+                                        </a>
+                                        <a href="{% url 'publications:delete-commentary' comment.pk %}"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Удалить
+                                        </a>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
