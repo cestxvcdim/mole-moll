@@ -32,7 +32,7 @@ class Subscription(models.Model):
     payment_date = models.DateField(auto_now_add=True, verbose_name='дата покупки')
 
     subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions', verbose_name='подписчик')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='автор')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='own_sub', verbose_name='автор')
 
     def __str__(self):
         return f'{self.subscriber.first_name} {self.subscriber.last_name}, {self.author.first_name} {self.author.last_name}'
