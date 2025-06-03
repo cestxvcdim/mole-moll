@@ -23,7 +23,8 @@ class PublicationListView(LoginRequiredMixin, ListView):
 
         qs = qs.filter(
             Q(is_free=True) |
-            Q(author__subscriptions__subscriber=user)
+            Q(author__own_sub__subscriber=user) |
+            Q(author=user)
         ).distinct()
 
         if query:
@@ -52,9 +53,10 @@ class PublicationDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
 
     def test_func(self):
         publication = self.get_object()
-        if publication.is_free:
+        user = self.request.user
+        if publication.is_free or publication.author == user or user.is_superuser:
             return True
-        elif Subscription.objects.filter(author=publication.author, subscriber=self.request.user).exists():
+        elif Subscription.objects.filter(author=publication.author, subscriber=user).exists():
             return True
         return False
 

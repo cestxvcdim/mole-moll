@@ -87,12 +87,13 @@ class UserDetailView(LoginRequiredMixin, DetailView):
         request_user = self.request.user
 
         is_subscribed = Subscription.objects.filter(author=author, subscriber=request_user).exists()
-        if is_subscribed:
+        has_access = is_subscribed or author == request_user
+        if has_access:
             pubs = Publication.objects.filter(author=author).order_by('-created_at')
         else:
             pubs = Publication.objects.filter(author=author, is_free=True).order_by('-created_at')
 
-        context['is_subscribed_on_author'] = is_subscribed
+        context['has_access'] = has_access
         context['user_publications'] = pubs
         return context
 
